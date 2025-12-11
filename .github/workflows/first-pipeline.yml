@@ -1,0 +1,31 @@
+# 1. The Name of the Workflow (appears in the Actions tab)
+name: 01 - Hello SDET
+
+# 2. The Trigger (Event)
+# When should this run? We want it to run when we push code to the main branch.
+on:
+  push:
+    branches: [ "main" ]
+  # This allows you to click a button in the UI to run it manually (great for testing)
+  workflow_dispatch:
+
+# 3. The Jobs
+# A workflow is made of one or more jobs.
+jobs:
+  # 'test-setup' is the internal ID of this job
+  test-setup:
+    # 4. The Runner
+    # Where does this run? We are borrowing a Linux machine from GitHub.
+    runs-on: ubuntu-latest
+
+    # 5. The Steps
+    # The sequence of tasks to perform.
+    steps:
+      - name: Say Hello
+        run: echo "Hello! I am beginning my CI journey."
+
+      - name: Check OS details
+        run: echo "I am running on Linux!"
+        
+      - name: Check Date
+        run: date
