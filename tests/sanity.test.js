@@ -1,5 +1,5 @@
 // tests/sanity.test.js
-const actual = 10;
+const actual = 99;
 const expected = 10;
 
 if (actual === expected) {
