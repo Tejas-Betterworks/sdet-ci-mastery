@@ -1,31 +1,29 @@
-# 1. The Name of the Workflow (appears in the Actions tab)
-name: 01 - Hello SDET
+name: 02 - Basic CI Pipeline
 
-# 2. The Trigger (Event)
-# When should this run? We want it to run when we push code to the main branch.
 on:
   push:
     branches: [ "main" ]
-  # This allows you to click a button in the UI to run it manually (great for testing)
   workflow_dispatch:
 
-# 3. The Jobs
-# A workflow is made of one or more jobs.
 jobs:
-  # 'test-setup' is the internal ID of this job
-  test-setup:
-    # 4. The Runner
-    # Where does this run? We are borrowing a Linux machine from GitHub.
+  unit-testing:
     runs-on: ubuntu-latest
 
-    # 5. The Steps
-    # The sequence of tasks to perform.
     steps:
-      - name: Say Hello
-        run: echo "Hello! I am beginning my CI journey."
+      # ACTION 1: CHECKOUT
+      # This downloads your repository code onto the runner.
+      # Without this, the runner cannot see 'sanity.test.js'.
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Check OS details
-        run: echo "I am running on Linux!"
-        
-      - name: Check Date
-        run: date
+      # ACTION 2: SETUP ENVIRONMENT
+      # We need Node.js installed to run a .js file.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ACTION 3: EXECUTE TEST
+      # Now we run the script we created in Step 1.
+      - name: Run Sanity Test
+        run: node tests/sanity.test.js
