@@ -1,4 +1,4 @@
-name: 02 - Basic CI Pipeline
+name: 03 - Playwright & Artifacts
 
 on:
   push:
@@ -6,24 +6,39 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-testing:
+  e2e-tests:
     runs-on: ubuntu-latest
 
     steps:
-      # ACTION 1: CHECKOUT
-      # This downloads your repository code onto the runner.
-      # Without this, the runner cannot see 'sanity.test.js'.
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ACTION 2: SETUP ENVIRONMENT
-      # We need Node.js installed to run a .js file.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ACTION 3: EXECUTE TEST
-      # Now we run the script we created in Step 1.
-      - name: Run Sanity Test
-        run: node tests/sanity.test.js
+      # NEW: Install dependencies defined in package.json
+      - name: Install Dependencies
+        run: npm install
+
+      # NEW: Install Playwright Browsers (Chrome/Firefox/etc)
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # NEW: Run the test and generate a report
+      # We ignore failure (continue-on-error) because we still want to 
+      # upload the report even if tests fail!
+      - name: Run Playwright Tests
+        run: npx playwright test --reporter=html
+        continue-on-error: true
+
+      # ACTION 4: UPLOAD ARTIFACTS
+      # This grabs the 'playwright-report' folder and saves it to GitHub
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        if: always() # Run this even if previous steps failed
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
