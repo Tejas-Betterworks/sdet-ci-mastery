@@ -1,0 +1,49 @@
+name: 04 - Cross-Browser Matrix
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-browser:
+    # 1. Define the Matrix
+    # This will spawn 3 separate jobs (3 VMs) running in parallel.
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    name: Test on ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # 2. Use the Matrix Variable
+      # We dynamically inject the browser name into the command.
+      - name: Run Tests (${{ matrix.browser }})
+        run: npx playwright test --project=${{ matrix.browser }}
+        continue-on-error: true
+
+      # 3. Upload Unique Artifacts
+      # If we name them all "playwright-report", they will overwrite each other!
+      # We append the browser name to the artifact filename.
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 30
